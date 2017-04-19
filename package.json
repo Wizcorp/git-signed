@@ -1,0 +1,33 @@
+{
+  "name": "git-signed",
+  "version": "0.0.1",
+  "description": "Scan a git repository and make sure all commits are signed",
+  "main": "index.js",
+  "bin": {
+    "git-signed": "index.js"
+  },
+  "scripts": {
+    "test": "eslint --ext .js,.json ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wizcorp/git-signed.git"
+  },
+  "keywords": [
+    "git",
+    "sign",
+    "ci"
+  ],
+  "author": "Marc Trudel <mtrudel@wizcorp.jp>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Wizcorp/git-signed/issues"
+  },
+  "homepage": "https://github.com/Wizcorp/git-signed#readme",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-plugin-json": "^1.2.0",
+    "git-message": "^1.0.1",
+    "pre-commit": "^1.2.2"
+  }
+}
