@@ -66,6 +66,18 @@ not to look past that commit.
 
 Note that `git-signed` will only scan commits in the current branch.
 
+GitHub repository configuration
+-------------------------------
+
+![repo settings](./repo-settings.png)
+
+If you are using GitHub, you will need to disable` Allow squash commit` and `Allow rebase commit`;
+this is due to the fact that signed commits would eithe be squashed into an unsigned one, or
+simply get unsigned.
+
+But that doesn't mean you should not encourage your contributors to rebase and/or squash! It
+simply means they will now have to do it locally, where all operations made can be signed.
+
 License
 -------
 

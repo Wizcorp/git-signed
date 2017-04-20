@@ -8,6 +8,7 @@ const checkAfter = process.argv[2]
 const command = 'git'
 const args = [
   'log',
+  '--no-merges',
   '--pretty=format:%G? %h %aN\t%s'
 ]
 

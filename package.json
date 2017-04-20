@@ -1,6 +1,6 @@
 {
   "name": "git-signed",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Scan a git repository and make sure all commits are signed",
   "main": "index.js",
   "bin": {
