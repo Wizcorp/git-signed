@@ -1,5 +1,9 @@
 ![Logo](./images/logo.png)
 
+[![GitHub tag](https://img.shields.io/github/tag/Wizcorp/git-signed.svg?style=flat-square)](https://github.com/Wizcorp/git-signed/releases/latest)
+[![npm](https://img.shields.io/npm/v/git-signed.svg?style=flat-square)](https://www.npmjs.com/package/git-signed)
+[![npm](https://img.shields.io/npm/dt/git-signed.svg?style=flat-square)](https://www.npmjs.com/package/git-signed)
+
 Why?
 ----
 
