@@ -2,9 +2,11 @@ const cp = require('child_process')
 const fs = require('fs')
 const inquirer = require('inquirer')
 const path = require('path')
+const PrettyError = require('pretty-error')
 const tempfile = require('tempfile')
 
-const DEFAULT_GPG_KEY_SERVER = 'keys.gnupg.net'
+const pe = new PrettyError();
+const DEFAULT_GPG_KEY_SERVER = 'hkp://keys.gnupg.net'
 
 const pkgDataPath = path.join(process.cwd(), 'package.json')
 const pkgData = require(pkgDataPath)
@@ -38,6 +40,65 @@ function setToGitConfig(entryLabel, value) {
   cp.execSync(`git config ${entryLabel} ${value}`)
 }
 
+// Windows appears to be using gnupg instead of gpgme, and the output is
+// slightly different.
+//
+// Todo: detect gnupg from gpgme
+function parseWindowsInfo(keyLines) {
+  const firstLine = keyLines[0].substring(6)
+  const [ idAndEncryption, creationDate, /* expire tag */ , expirationDateData ] = firstLine.split(' ')
+  const [ encryption, id ] = idAndEncryption.split('/')
+  const expirationDate = expirationDateData ? expirationDateData.substring(0, expirationDateData.length - 1) : 'never'
+  const userIds = keyLines
+    .filter((val) => val.substring(0, 3) === 'uid')
+    .map((val) => val.substring(3).trim())
+
+  const info = {
+    encryption,
+    creationDate,
+    expirationDate
+  }
+
+  return { id, userIds, info }
+}
+
+function parseInfo(keyLines) {
+  const id = keyLines[1].trim()
+  const userIds = keyLines
+    .filter((val) => val.substring(0, 3) === 'uid')
+    .map((val) => val.substring(3).trim())
+
+  const info = {}
+  const infoKeys = [
+    'encryption',
+    'creationDate',
+    'flags',
+    'expirationDate'
+  ]
+
+  keyLines[0]
+    .substring(6)
+    .split(' ')
+    .forEach((val) => {
+      if (val === '[expires:') {
+        return
+      }
+
+      const key = infoKeys.shift()
+      if (key === 'expirationDate') {
+        info[key] = val.substring(0, val.length - 1)
+      } else {
+        info[key] = val
+      }
+    })
+
+  if (!info.expirationDate) {
+    info.expirationDate = 'never'
+  }
+
+  return { id, userIds, info }
+}
+
 function listKeys() {
   const keys = []
   const out = cp.execSync(`gpg --list-secret-keys`)
@@ -58,40 +119,8 @@ function listKeys() {
       firstKey = false
     }
 
-    const id = keyLines[1].trim()
-    const userIds = keyLines
-      .filter((val) => val.substring(0, 3) === 'uid')
-      .map((val) => val.substring(3).trim())
-
-    const info = {}
-    const infoKeys = [
-      'encryption',
-      'creationDate',
-      'flags',
-      'expirationDate'
-    ]
-
-    keyLines[0]
-      .substring(6)
-      .split(' ')
-      .forEach((val) => {
-        if (val === '[expires:') {
-          return
-        }
-
-        const key = infoKeys.shift()
-        if (key === 'expirationDate') {
-          info[key] = val.substring(0, val.length - 1)
-        } else {
-          info[key] = val
-        }
-      })
-
-    if (!info.expirationDate) {
-      info.expirationDate = 'never'
-    }
-
-    keys.push({ id, info, userIds })
+    const keyInfo = process.platform === 'win32' ? parseWindowsInfo(keyLines) : parseInfo(keyLines)
+    keys.push(keyInfo)
   }
 
   return keys
@@ -140,7 +169,7 @@ async function createKey(name, email) {
 
   fs.writeFileSync(configFile, `%no-ask-passphrase
 %no-protection
-Key-Type: default
+Key-Type: 1
 Key-Length: 4096
 Subkey-Type: 1
 Subkey-Length: 4096
@@ -225,4 +254,4 @@ function configureLocalGitRepository(user, email, keyId) {
 
 retrieveInfo()
   .then(savePackageFile)
-  .catch((error) => console.error(error) && process.exit(1))
+  .catch((error) => console.error(pe.render(error)) || process.exit(1))

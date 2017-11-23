@@ -13,7 +13,7 @@ Signing your commits ensure:
   2. That no one cant impersonate you and try to add commits to a codebase
 
 However, getting started with commit signing is often a tedious process. Many developers
-still do not sign their commits despite both GitHub and Gitlab promoting its use. 
+still do not sign their commits despite both GitHub and GitLab promoting its use. 
 
 Also, without having imported the public key of collaborators on the project, you
 will not be able to confirm that their commits are indeed signed. This means that locally
@@ -28,13 +28,14 @@ key.
 Requirements
 ------------
 
-You will need GPG installed locally on your machine.
+You will need `gpgme` installed locally on your machine.
 
-  - Arch Linux: yaourt -S gpgme
-  - Ubuntu: apt-get install gpgme
-  - macOS: brew install gpgme
+  - Arch Linux: `pacman -S gpgme` or `yaourt -S gpgme`
+  - Ubuntu: `apt-get install gpgme`
+  - macOS: `brew install gpgme`
 
-Git already ships with `gpg` on Windows.
+Windows users do not need to install gpgme, we will be using
+the copy of gnupg that is installed alongside `git`.
 
 Installation
 ------------
@@ -67,15 +68,15 @@ Then, add yourself as a collaborator. This will add a `collaborators` entry
 in you `package.json` file that will be augmented with information about
 how to fetch your key.
 
-```script
+```shell
 npm run collaborator:join
 ```
 
-On GitHub and Gitlab PRs, signed commit will have a "verified" badge attached to them.
+On GitHub and GitLab PRs, signed commit will have a "verified" badge attached to them.
 
 ![verified badge](./images/verified.png)
 
-To add your GPG key to GitHub, Gitlab, or other systems, export your key.
+To add your GPG key to GitHub, GitLab, or other systems, export your key.
 
 ```shell
 npm run collaborator:export-key
@@ -139,7 +140,7 @@ Repository configuration
 
 ![repo settings](./images/repo-settings.png)
 
-If you are using GitHub or Gitlab, you will need to disable `Allow squash commit` 
+If you are using GitHub or GitLab, you will need to disable `Allow squash commit` 
 and `Allow rebase commit`; this is due to the fact that signed commits would eithet
 be squashed into an unsigned one, or simply get unsigned.
 
