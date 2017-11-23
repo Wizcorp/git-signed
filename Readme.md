@@ -1,35 +1,25 @@
-git-signed
-==========
-
-Scan a git repository and make sure all commits are signed.
+![Logo](./images/logo.png)
 
 Why?
 ----
 
 Signing your commits ensure:
 
-  1. That your commits cannot be re-edited by someone esle (using git commit --amend)
+  1. That your commits cannot be re-edited by someone else (using git commit --amend)
   2. That no one cant impersonate you and try to add commits to a codebase
 
-On GitHub PRs, signed commit will have a "verified" badge attached to them.
+However, getting started with commit signing is often a tedious process. Many developers
+still do not sign their commits despite both GitHub and Gitlab promoting its use. 
 
-![verified badge](./verified.png)
+Also, without having imported the public key of collaborators on the project, you
+will not be able to confirm that their commits are indeed signed. This means that locally
+(either during development or on a CI server), you will likely not have a straightforward
+way to verify and ensure that all commits in your repository are indeed signed.
 
-However, you will most likely want to make sure that all commits
-in your repository are signed. It is a good practice for developer,
-and an important safety precaution for your projects. This package
-can be used as a CI step to make sure that submitted commits are all
-signed.
-
-How do I sign my commits?
--------------------------
-
-  * [Signing your work](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work)
-  * [Automatically signing all your commits](http://stackoverflow.com/a/20628522/262831)
-
-You will need to upload your GPG key on GitHub for your commits to be marked as verified:
-Go to [https://github.com/settings/keys](https://github.com/settings/keys) and add your
-key under GPG keys.
+git-signed solves both problems by providing a workflow for creating, 
+publishing, and locally syncing GPG keys. It also configures 
+the local repository to automatically sign all commits with the selected
+key.
 
 Installation
 ------------
@@ -46,39 +36,100 @@ In `package.json`:
 ```json
 {
   "scripts": {
-    "test": "git-signed"
+    "collaborator:join": "git-signed --join",
+    "collaborator:export-key": "git-signed --export",
+    "collaborator:sync-keys": "git-signed --sync",
+    "test:commit-signatures": "git-signed"
   }
 }
 ```
 
-Alternatively, if you were previously accepting unsigned commits and now want to
-enforce signature, you can pass a commit hash as a first argument to tell `git-signed`
-not to look past that commit.
+Then, add yourself as a collaborator. This will add a `collaborators` entry
+in you `package.json` file that will be augmented with information about
+how to fetch your key.
 
+```script
+npm run collaborator:join
+```
+
+On GitHub and Gitlab PRs, signed commit will have a "verified" badge attached to them.
+
+![verified badge](./images/verified.png)
+
+To add your GPG key to GitHub, Gitlab, or other systems, export your key.
+
+```shell
+npm run collaborator:export-key
+```
+
+As collaborators join the project, more `collaborators` entries will be added
+to your `package.json`. You will need to fetch their keys so to see their 
+commits as properly signed.
+
+```shell
+npm run collaborator:sync-keys
+```
+
+Once you have synced the keys to your localk keyring, you can now
+test that all commits are indeed signed.
+
+```shell
+test:commit-signatures
+```
+
+In some cases, you will want to start checking for signed
+commits only from a certain point in history (for instance, if all previous
+commits on the project were not signed until this point). Adding a commit
+short hash to the `git-signed` command will ignore all previous commits
+in your commit tree.
 
 ```json
 {
   "scripts": {
-    "test": "git-signed 86ce8bc"
+    "test:commit-signatures": "git-signed 86ce8bc"
   }
 }
 ```
 
-Note that `git-signed` will only scan commits in the current branch.
+Finally, note that `git-signed` will only scan commits in the current branch.
+To scan another branch, simply switch to it, and run git-signed again.
 
-GitHub repository configuration
--------------------------------
+Integrating with Husky
+----------------------
 
-![repo settings](./repo-settings.png)
+Husky allows for the automated setup of commit hooks. One common use
+of git-signed is to add a post-commit test to let developers know that they
+need to sign their work.
 
-If you are using GitHub, you will need to disable` Allow squash commit` and `Allow rebase commit`;
-this is due to the fact that signed commits would eithe be squashed into an unsigned one, or
-simply get unsigned.
+```json
+{
+  "scripts": {
+    "precommit": "npm run test",
+    "postcommit": "npm run test:commit-signatures",
+    "postmerge": "npm install",
+    "update": "npm install"
+  }
+}
+```
 
-But that doesn't mean you should not encourage your contributors to rebase and/or squash! It
-simply means they will now have to do it locally, where all operations made can be signed.
+You may find a more complete example in the [package.json](./package.json) file
+of this project.
+
+Repository configuration
+------------------------
+
+![repo settings](./images/repo-settings.png)
+
+If you are using GitHub or Gitlab, you will need to disable `Allow squash commit` 
+and `Allow rebase commit`; this is due to the fact that signed commits would eithet
+be squashed into an unsigned one, or simply get unsigned.
 
 License
 -------
 
 MIT.
+
+Acknowledgements
+----------------
+
+Git graphic by <a href="https://thenounproject.com/sergey.novosyolov">tnp_sergey_novosyolov</a> from <a href="https://thenounproject.com/">TheNounProject</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a>. Check out the new logo that I created on <a href="https://logomakr.com/1D6HDT" title="Logo Maker">LogoMaker.com</a> https://logomakr.com/1D6HDT

@@ -1,13 +1,21 @@
 {
   "name": "git-signed",
-  "version": "0.0.2",
-  "description": "Scan a git repository and make sure all commits are signed",
+  "version": "0.1.0",
+  "description": "git commit signing made easy (and enforceable)",
   "main": "index.js",
   "bin": {
     "git-signed": "index.js"
   },
   "scripts": {
-    "test": "eslint --ext .js,.json ."
+    "test": "eslint --ext .js,.json .",
+    "collaborator:join": "node . --join",
+    "collaborator:export-key": "node . --export",
+    "collaborator:sync-keys": "node . --sync",
+    "test:commit-signatures": "node . 4d770e8",
+    "precommit": "npm run test",
+    "postcommit": "npm run test:commit-signatures",
+    "postmerge": "npm install && collaborator:sync-keys",
+    "update": "npm install && collaborator:sync-keys"
   },
   "repository": {
     "type": "git",
@@ -27,7 +35,21 @@
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-plugin-json": "^1.2.0",
-    "git-message": "^1.0.1",
-    "pre-commit": "^1.2.2"
-  }
+    "git-message": "1.0.4",
+    "husky": "0.14.3"
+  },
+  "dependencies": {
+    "chalk": "2.3.0",
+    "clipboardy": "1.2.2",
+    "git-url-parse": "7.0.1",
+    "inquirer": "4.0.0",
+    "tempfile": "2.0.0"
+  },
+  "contributors": [
+    {
+      "name": "stelcheck",
+      "email": "mtrudel@wizcorp.jp",
+      "key": "hkp://pool.sks-keyservers.net#9115133EDCD7C42B13C1890DFCF165CCB3B5B506"
+    }
+  ]
 }
