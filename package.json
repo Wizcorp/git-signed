@@ -14,8 +14,8 @@
     "test:commit-signatures": "node . 4d770e8",
     "precommit": "npm run test",
     "postcommit": "npm run test:commit-signatures",
-    "postmerge": "npm install && collaborator:sync-keys",
-    "update": "npm install && collaborator:sync-keys"
+    "postmerge": "npm install && npm run collaborator:sync-keys",
+    "update": "npm install && npm run collaborator:sync-keys"
   },
   "repository": {
     "type": "git",
