@@ -4,9 +4,13 @@ const cp = require('child_process')
 const GitUrlParse = require('git-url-parse');
 
 function getFromGitConfig(entryLabel) {
-  const str = cp.execSync(`git config ${entryLabel}`).toString()
+  try {
+    const str = cp.execSync(`git config ${entryLabel}`).toString()
 
-  return str.substring(str, str.length - 1)
+    return str.substring(str, str.length - 1)
+  } catch (error) {
+    return null
+  }
 }
 
 function getOriginDomain() {
@@ -17,6 +21,19 @@ function getOriginDomain() {
 }
 
 const keyId = getFromGitConfig(`user.signingkey`)
+
+if (!keyId) {
+  console.error('')
+  console.error(chalk.red.bold('Cannot find your GPG key ID!'))
+  console.error(
+    chalk.yellow.bold('Did you join as a collaborator?'),
+    chalk.green.bold('./node_modules/.bin/git-signed --join')
+  )
+  console.error('')
+
+  process.exit(1)
+}
+
 const key = cp.execSync(`gpg --armor --export ${keyId}`).toString()
 clipboardy.writeSync(key);
 console.log(chalk.gray(key))

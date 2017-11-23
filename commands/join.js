@@ -4,7 +4,7 @@ const inquirer = require('inquirer')
 const path = require('path')
 const tempfile = require('tempfile')
 
-const DEFAULT_GPG_KEY_SERVER = 'hkp://pool.sks-keyservers.net'
+const DEFAULT_GPG_KEY_SERVER = 'keys.gnupg.net'
 
 const pkgDataPath = path.join(process.cwd(), 'package.json')
 const pkgData = require(pkgDataPath)
@@ -13,10 +13,25 @@ if (!pkgData.contributors) {
   pkgData.contributors = []
 }
 
-function getFromGitConfig(entryLabel) {
-  const str = cp.execSync(`git config ${entryLabel}`).toString()
+function cannotBeEmpty(errorText) {
+  return function (input) {
+    const done = this.async();
+    if (input === '') {
+      return done(errorText)
+    }
 
-  return str.substring(str, str.length - 1)
+    return done(null, true)
+  }
+}
+
+function getFromGitConfig(entryLabel) {
+  try {
+    const str = cp.execSync(`git config ${entryLabel}`).toString()
+
+    return str.substring(str, str.length - 1)
+  } catch (error) {
+    return ''
+  }
 }
 
 function setToGitConfig(entryLabel, value) {
@@ -91,11 +106,13 @@ async function retrieveInfo() {
       type: 'input',
       name: 'name',
       message: 'Enter your name',
+      validate: cannotBeEmpty('Your name cannot be empty'),
       default: defaultName
     }, {
       type: 'input',
       name: 'email',
       message: 'Enter your email',
+      validate: cannotBeEmpty('Your email cannot be empty'),
       default: defaultEmail
     }])
 

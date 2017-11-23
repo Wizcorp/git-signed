@@ -1,6 +1,6 @@
 {
   "name": "git-signed",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "git commit signing made easy (and enforceable)",
   "main": "index.js",
   "bin": {
@@ -49,7 +49,7 @@
     {
       "name": "stelcheck",
       "email": "mtrudel@wizcorp.jp",
-      "key": "hkp://pool.sks-keyservers.net#9115133EDCD7C42B13C1890DFCF165CCB3B5B506"
+      "key": "keys.gnupg.net#9115133EDCD7C42B13C1890DFCF165CCB3B5B506"
     }
   ]
 }

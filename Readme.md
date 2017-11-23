@@ -25,6 +25,17 @@ publishing, and locally syncing GPG keys. It also configures
 the local repository to automatically sign all commits with the selected
 key.
 
+Requirements
+------------
+
+You will need GPG installed locally on your machine.
+
+  - Arch Linux: yaourt -S gpgme
+  - Ubuntu: apt-get install gpgme
+  - macOS: brew install gpgme
+
+Git already ships with `gpg` on Windows.
+
 Installation
 ------------
 
@@ -114,8 +125,8 @@ need to sign their work.
   "scripts": {
     "precommit": "npm run test",
     "postcommit": "npm run test:commit-signatures",
-    "postmerge": "npm install",
-    "update": "npm install"
+    "postmerge": "npm install && npm run collaborator:sync-keys",
+    "update": "npm install && npm run collaborator:sync-keys"
   }
 }
 ```

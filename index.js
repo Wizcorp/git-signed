@@ -4,6 +4,11 @@ const chalk = require('chalk')
 const cp = require('child_process')
 const readline = require('readline')
 
+// Required to access git's copy of gpg
+if (process.platform === 'win32') {
+  process.env.PATH += ';C:\\Program Files\\Git\\usr\\bin\\'
+}
+
 function logFlag(flag, desc) {
   console.log(chalk.green.bold(flag), desc)
 }
