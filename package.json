@@ -1,6 +1,6 @@
 {
   "name": "git-signed",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "git commit signing made easy (and enforceable)",
   "main": "index.js",
   "bin": {

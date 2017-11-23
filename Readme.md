@@ -31,6 +31,10 @@ npm install --save-dev git-signed
 Usage
 -----
 
+[![Tutorial](./images/screenshot.png)](https://asciinema.org/a/149115)
+
+[Click here to see our tutorial](https://asciinema.org/a/149115)
+
 In `package.json`:
 
 ```json
