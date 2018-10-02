@@ -89,7 +89,7 @@ commits as properly signed.
 npm run collaborator:sync-keys
 ```
 
-Once you have synced the keys to your localk keyring, you can now
+Once you have synced the keys to your local keyring, you can now
 test that all commits are indeed signed.
 
 ```shell
