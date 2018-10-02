@@ -14,13 +14,14 @@ function logFlag(flag, desc) {
 }
 
 function showHelpAndExit(flag) {
-  console.log(chalk.cyan.bold(`Usage: git-signed [--help|--join|--sync|--export|commit hash])`))
+  console.log(chalk.cyan.bold(`Usage: git-signed [--help|--join|--sync|--export|--trust-commits|commit hash])`))
   console.log(``)
 
-  logFlag(`  --help`, `        Print this help screen`)
-  logFlag(`  --add`, `         Add yourself as a contributor to the project`)
-  logFlag(`  --sync`, `        Import GPG keys from all contributors`)
-  logFlag(`  [commit hash]`, ` Check history from this commit onward (optional)`)
+  logFlag(`  --help`, `         Print this help screen`)
+  logFlag(`  --add`, `          Add yourself as a contributor to the project`)
+  logFlag(`  --sync`, `         Import GPG keys from all contributors`)
+  logFlag(`  --trust-commits`, `Check if commits were made with certified keys (default false)`)
+  logFlag(`  [commit hash]`, `  Check history from this commit onward (optional)`)
   console.log(``)
 
   console.log(chalk.yellow.bold(`If no commit hash is provided, the entire
@@ -50,6 +51,9 @@ function showGuide() {
 // Command and arguments
 const argOne = process.argv[2]
 
+// If untrusted commits found, program shall exit
+var trustCommits = false
+
 switch (argOne) {
   case '--join':
   case '--sync':
@@ -58,7 +62,9 @@ switch (argOne) {
     break
 
   default:
-    if (argOne && argOne[0] === '-') {
+    if (argOne === '--trust-commits') {
+      trustCommits = true
+    } else if (argOne && argOne[0] === '-') {
       showHelpAndExit(argOne[0])
     }
 
@@ -70,7 +76,7 @@ switch (argOne) {
       '--pretty=format:%G? %h %aN\t%s'
     ]
 
-    if (checkAfter) {
+    if (checkAfter && checkAfter !== '--trust-commits') {
       args.push(`${checkAfter}..`)
     }
 
@@ -88,6 +94,9 @@ switch (argOne) {
     // We will store all unsigned commits here
     let unsignedCommits = []
 
+    // We will store all invalidated commits here
+    let invalidatedCommits = []
+
     const rl = readline.createInterface({
       input: proc.stdout
     })
@@ -99,11 +108,36 @@ switch (argOne) {
       if (line.substring(0, 2) === 'N ') {
         unsignedCommits.push(line.substring(2))
       }
+      if (line.substring(0, 2) !== 'G ') {
+        invalidatedCommits.push(line.substring(2))
+      }
     })
 
     // On readline close, make sure we have no
     // unsigned commits
     rl.on('close', function () {
+      if (invalidatedCommits.length > 0) {
+        console.error('')
+        console.error(chalk.gray('The following commits are not validated'))
+        console.error(chalk.gray('---------------------------------------'))
+        console.error('')
+
+        invalidatedCommits.forEach((line) => {
+          const [ details, title ] = line.split('\t')
+          const [ hash, user ] = details.split(' ')
+
+          console.error(chalk.white(hash), chalk.white(user) + '\t' + chalk.gray(title))
+        })
+        console.error('')
+        console.error(chalk.gray('----------------------------------------'))
+
+        if (trustCommits) {
+          console.error('')
+          showGuide()
+          process.exit(1)
+        }
+      }
+
       if (unsignedCommits.length > 0) {
         console.error('')
         console.error(chalk.red.bold('The following commits are not signed'))
